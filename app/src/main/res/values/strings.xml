@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">빚쟁이</string>
+
+    <string name="banner_ad_unit_id">ca-app-pub-9348035706320816/7606090883</string>
+
+    <string name="ad_unit_id">ca-app-pub-9348035706320816/6679257689</string>
+
+    <string name="name_file">name_list.txt</string>
+</resources>
