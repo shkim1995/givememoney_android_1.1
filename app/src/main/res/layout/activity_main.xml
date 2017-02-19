@@ -179,8 +179,8 @@
                 android:layout_width="33dp"
                 android:layout_height="33dp"
                 android:background="@drawable/arrow_1"
-                android:layout_marginRight="15dp"
-                android:layout_marginLeft="0dp"/>
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"/>
 
             <Button
                 android:id="@+id/menu_front_btn"
@@ -216,6 +216,8 @@
             android:background="@drawable/drop_shadow">
         </View>
     </LinearLayout>
+
+
 
 
     <LinearLayout
@@ -266,6 +268,17 @@
             android:textSize="20dp"/>
 
     </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/main_mode_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/menu_bot_normal"
+        android:text="Normal Mode"
+        android:textSize="30dp"
+        android:layout_marginBottom = "12dp"
+        android:gravity="center_horizontal"/>
 
 
 </RelativeLayout>

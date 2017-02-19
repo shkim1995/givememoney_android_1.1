@@ -87,12 +87,15 @@ public class MainActivity extends Activity {
     //player정보
     ArrayList<String> playerName;
     int playerNum;
+    int sum = 0; // sum of arrows
+
 
     //원 (graphic) 정보
     static Circles[] circles;
 
     //채무관계 정보 [i][j] : i가 j에게
     static int[][] payment;
+    static int[][] payment_new;
 
     //mode 정보 (normal - selected)
     boolean isNormalMode = true;
@@ -134,11 +137,14 @@ public class MainActivity extends Activity {
     EditText editText2;
     TextView text1;
     TextView text2;
+    TextView mode_text;
 
 
     //debugs
     Button btnDeb;
     Button btnDeb2;
+    boolean debugMode;
+    int num_recursion;
 
     static PaymentLog log;
 
@@ -271,19 +277,32 @@ public class MainActivity extends Activity {
             for(int j=0; j<playerNum; j++)
                 payment[i][j] = 0;
 
+        payment_new = new int[playerNum][playerNum];
+        for(int i=0; i<playerNum; i++)
+            for(int j=0; j<playerNum; j++)
+                payment_new[i][j] = 0;
+
         isSelected = new boolean[playerNum];
         for(int i=0; i<playerNum; i++)
             isSelected[i] = false;
 
+
+        sum = playerNum*playerNum;
+
         //DEBUG INITIALIZATION
+        debugMode = false;
+        num_recursion = 0;
+
         btnDeb = (Button)findViewById(R.id.menu_deb);
         btnDeb2 = (Button)findViewById(R.id.menu_deb2);
 
         btnDeb.setVisibility(View.INVISIBLE);
         btnDeb.setEnabled(false);
 
+
         btnDeb2.setVisibility(View.INVISIBLE);
         btnDeb2.setEnabled(false);
+
 
         //LAYOUTS INITIALIZATION
         mainLayout = (RelativeLayout) findViewById(R.id.main_layout);
@@ -322,11 +341,15 @@ public class MainActivity extends Activity {
         editText2 = (EditText)findViewById(R.id.menu_edittext2);
         text1 = (TextView)findViewById(R.id.text1);
         text2 = (TextView)findViewById(R.id.text2);
+        mode_text = (TextView)findViewById(R.id.main_mode_name);
         Typeface typeFace = Typeface.createFromAsset(getAssets(), "fonts/TmonMonsori.ttf");
         text1.setTypeface(typeFace);
         text2.setTypeface(typeFace);
         text1.setTextColor(Color.GRAY);
         text2.setTextColor(Color.BLACK);
+        mode_text.setTypeface(typeFace);
+        mode_text.setTextColor(Color.GRAY);
+        mode_text.setText("간략화 전");
 
         //DRAW CENTER GRAPHICS
         centerView = new CenterView(this);
@@ -572,7 +595,9 @@ public class MainActivity extends Activity {
                     changeBtn.setText("되돌리기!");
                     frontBtn.setEnabled(false);
                     backBtn.setEnabled(false);
-                    change_payment();
+                    change_payment_3();
+                    mode_text.setTextColor(Color.BLACK);
+                    mode_text.setText("간략화 후");
                     centerView.invalidate();
                     return;
                 } else {
@@ -583,6 +608,8 @@ public class MainActivity extends Activity {
                     if (log.frontable())
                         frontBtn.setEnabled(true);
                     renew_payment();
+                    mode_text.setTextColor(Color.GRAY);
+                    mode_text.setText("간략화 전");
                     centerView.invalidate();
                 }
             }
@@ -676,12 +703,8 @@ public class MainActivity extends Activity {
         btnDeb2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    deleteFile("name_list.txt");
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                debugMode = !debugMode;
+                Toast.makeText(MainActivity.this, debugMode ? "Debug Mode" : "Normal Mode", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -1052,6 +1075,118 @@ public class MainActivity extends Activity {
                 break;
 
         }
+    }
+
+    int getSum(){
+        int sum = 0;
+        for(int i=0; i<playerNum; i++){
+            for(int j=0; j<playerNum; j++){
+                if(payment[i][j]>0)
+                    sum++;
+            }
+        }
+        return sum;
+    }
+
+    void copyPayment(int[][] x, int[][] y){ //x->y
+        for(int i=0; i<playerNum; i++){
+            for(int j=0; j<playerNum; j++){
+                y[i][j] = x[i][j];
+            }
+        }
+    }
+
+    void change_payment_3(){
+//        int[] before = new int[playerNum];
+//        int[] after = new int[playerNum];
+//
+//        for(int i=0; i<playerNum; i++){
+//            for(int j=0; j<playerNum; j++){
+//                if(payment[i][j]>0) {
+//                    before[j] += payment[i][j];
+//                    before[i] -= payment[i][j];
+//                }
+//            }
+//        }
+
+        //////////////
+
+        payment_new = new int[playerNum][playerNum];
+        for(int i=0; i<playerNum; i++)
+            for(int j=0; j<playerNum; j++)
+                payment_new[i][j] = 0;
+
+        int[] pay = new int[playerNum];
+        for(int i=0; i<playerNum; i++){
+            for(int j=0; j<playerNum; j++){
+                if(payment[i][j]>0) {
+                    pay[j] += payment[i][j];
+                    pay[i] -= payment[i][j];
+                }
+            }
+        }
+
+        while(true){
+            boolean temp = true;
+
+            for(int i=0; i<playerNum; i++) {
+                if (pay[i] > 0) {
+                    temp = false;
+                    break;
+                }
+
+            }
+            if(temp)
+                break;
+
+            int min = 0;
+            int max = 0;
+            int minInd = -1;
+            int maxInd = -1;
+            for(int i=0; i<playerNum; i++) {
+                if(pay[i]>max) {
+                    max = pay[i];
+                    maxInd = i;
+                }
+                if(pay[i]<min) {
+                    min = pay[i];
+                    minInd = i;
+                }
+            }
+
+            int moneyFlow = max;
+            if(-min>max)
+                moneyFlow = -min;
+
+            payment_new[minInd][maxInd] = moneyFlow;
+            pay[minInd] += moneyFlow;
+            pay[maxInd] -= moneyFlow;
+        }
+
+        copyPayment(payment_new, payment);
+
+        ////////////
+
+//        for(int i=0; i<playerNum; i++){
+//            for(int j=0; j<playerNum; j++){
+//                if(payment[i][j]>0) {
+//                    after[j] += payment[i][j];
+//
+//                    after[i] -= payment[i][j];
+//                }
+//            }
+//        }
+//
+//        boolean temp = true;
+//        int x = -1;
+//        for(int i=0; i<playerNum; i++) {
+//            if (before[i] != after[i]) {
+//                x = i;
+//                temp = false;
+//                break;
+//            }
+//        }
+//        Toast.makeText(MainActivity.this, (temp ? "true" : "false")+" "+num_recursion, Toast.LENGTH_SHORT).show();
     }
 
     ///////////////////////////////////////////////////////////////////////
