@@ -14,10 +14,18 @@
     <RelativeLayout
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="350dp"
         android:layout_centerInParent="true">
 
     </RelativeLayout>
+
+
+    <LinearLayout
+        android:id="@+id/main_layout_selected"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:layout_centerInParent="true"/>
 
     <LinearLayout
         android:id="@+id/name_field"
@@ -217,7 +225,15 @@
         </View>
     </LinearLayout>
 
-
+    <TextView
+        android:id="@+id/text3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/menu_top_normal"
+        android:text="ddddd"
+        android:textSize="30dp"
+        android:layout_marginTop= "12dp"
+        android:gravity="center_horizontal" />
 
 
     <LinearLayout

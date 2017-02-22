@@ -54,6 +54,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -96,6 +97,7 @@ public class MainActivity extends Activity {
     //채무관계 정보 [i][j] : i가 j에게
     static int[][] payment;
     static int[][] payment_new;
+    static int[] pay; // 각자가 쓴 돈
 
     //mode 정보 (normal - selected)
     boolean isNormalMode = true;
@@ -103,6 +105,8 @@ public class MainActivity extends Activity {
     boolean[] isSelected;
 
     boolean isChanged = false;
+
+    boolean isGraphicMode = false;
 
     int small_rad;
     int big_rad;
@@ -118,6 +122,7 @@ public class MainActivity extends Activity {
     LinearLayout menuButSelected;
     CenterView centerView;
     LinearLayout nameField;
+    LinearLayout mainLayout_sel;
 
     //Buttons
     Button backBtn;
@@ -138,7 +143,7 @@ public class MainActivity extends Activity {
     TextView text1;
     TextView text2;
     TextView mode_text;
-
+    TextView text3;
 
     //debugs
     Button btnDeb;
@@ -272,10 +277,17 @@ public class MainActivity extends Activity {
             startActivity(temp_intent);
             finish();
         }
+
+        isGraphicMode = intent.getBooleanExtra("GRAP", true);
+
         payment = new int[playerNum][playerNum];
         for(int i=0; i<playerNum; i++)
             for(int j=0; j<playerNum; j++)
                 payment[i][j] = 0;
+
+        pay = new int[playerNum];
+        for(int i=0; i<playerNum; i++)
+            pay[i] = 0;
 
         payment_new = new int[playerNum][playerNum];
         for(int i=0; i<playerNum; i++)
@@ -341,17 +353,22 @@ public class MainActivity extends Activity {
         editText2 = (EditText)findViewById(R.id.menu_edittext2);
         text1 = (TextView)findViewById(R.id.text1);
         text2 = (TextView)findViewById(R.id.text2);
+        text3 = (TextView)findViewById(R.id.text3);
         mode_text = (TextView)findViewById(R.id.main_mode_name);
         Typeface typeFace = Typeface.createFromAsset(getAssets(), "fonts/TmonMonsori.ttf");
         text1.setTypeface(typeFace);
         text2.setTypeface(typeFace);
+        text3.setTypeface(typeFace);
         text1.setTextColor(Color.GRAY);
         text2.setTextColor(Color.BLACK);
+        text3.setTextColor(Color.BLACK);
+        text3.setText("");
         mode_text.setTypeface(typeFace);
         mode_text.setTextColor(Color.GRAY);
         mode_text.setText("간략화 전");
 
         //DRAW CENTER GRAPHICS
+
         centerView = new CenterView(this);
         mainLayout.addView(centerView);
 
@@ -440,8 +457,12 @@ public class MainActivity extends Activity {
             menuButSelected.setVisibility(View.INVISIBLE);
             menuTopNormal.setVisibility(View.VISIBLE);
             menuButNormal.setVisibility(View.VISIBLE);
-
-            nameField.setVisibility(View.INVISIBLE);
+            if(isGraphicMode) {
+                nameField.setVisibility(View.INVISIBLE);
+            }
+            else{
+                text3.setText("");
+            }
             isNormalMode = true;
             inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
             centerView.invalidate();
@@ -454,8 +475,13 @@ public class MainActivity extends Activity {
             menuTopNormal.setVisibility(View.INVISIBLE);
             menuButNormal.setVisibility(View.INVISIBLE);
 
-            nameField.setVisibility(View.VISIBLE);
-            text2.setText(playerName.get(host));
+            if(isGraphicMode) {
+                nameField.setVisibility(View.VISIBLE);
+                text2.setText(playerName.get(host));
+            }
+            else{
+                text3.setText("돈낸 사람 : "+playerName.get(host));
+            }
             isNormalMode = false;
             centerView.invalidate();
         }
@@ -599,6 +625,9 @@ public class MainActivity extends Activity {
                     mode_text.setTextColor(Color.BLACK);
                     mode_text.setText("간략화 후");
                     centerView.invalidate();
+                    if(!isGraphicMode){
+                        Toast.makeText(MainActivity.this, "공유하기 버튼을 눌러 결과를 공유하여 주시기 바랍니다. \n(조만간 그래픽 업데이트 예정)", Toast.LENGTH_SHORT).show();
+                    }
                     return;
                 } else {
                     isChanged = false;
@@ -611,6 +640,7 @@ public class MainActivity extends Activity {
                     mode_text.setTextColor(Color.GRAY);
                     mode_text.setText("간략화 전");
                     centerView.invalidate();
+
                 }
             }
         });
@@ -1164,6 +1194,7 @@ public class MainActivity extends Activity {
         }
 
         copyPayment(payment_new, payment);
+        change_payment();
 
         ////////////
 
@@ -1200,13 +1231,27 @@ public class MainActivity extends Activity {
             super(c);
             con = c;
         }
-
         public void initCircles(){
             circles = new Circles[playerNum];
             double theta = 2*Math.PI/playerNum;
+            int w = mainLayout.getWidth();
+            int h = mainLayout.getHeight();
+            int ww = w/6;
+            int hh = h/5;
+
+
             for(int i=0; i<playerNum; i++){
-                int x = (int)(center_x+big_rad*Math.sin(i*theta));
-                int y = (int)(center_y-big_rad*Math.cos(i*theta));
+                int x, y;
+
+                if(isGraphicMode) {
+                    x = (int) (center_x + big_rad * Math.sin(i * theta));
+                    y = (int) (center_y - big_rad * Math.cos(i * theta));
+                }
+                else{
+                    x = (int)((i%6+0.5)*ww);
+                    y = (int)((i/6+0.5)*hh);
+
+                }
                 circles[i] = new Circles(x, y, small_rad);
                 circles[i].name = playerName.get(i);
             }
@@ -1332,7 +1377,7 @@ public class MainActivity extends Activity {
 
             ////////////////화살표//////////////
 
-            if(isNormalMode){
+            if(isNormalMode && isGraphicMode){
                 for (int i = 0; i < playerNum; i++) {
                     for (int j = 0; j < playerNum; j++) {
                         if (payment[i][j] > 0)

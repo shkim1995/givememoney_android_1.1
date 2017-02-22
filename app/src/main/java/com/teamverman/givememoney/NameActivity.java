@@ -40,7 +40,8 @@ import com.google.android.gms.plus.model.people.Person;
 public class NameActivity  extends Activity {
 
     final int MIN_NUM = 2;
-    final int MAX_NUM = 8;
+    final int GRAPHICAL_NUM = 8;
+    final int MAX_NUM = 30;
 
     final double RANDOM_NUM = 0.10;
 
@@ -189,6 +190,12 @@ public class NameActivity  extends Activity {
                 }
                 intent.putExtra("NAMES", playerName);
                 intent.putExtra("RESET", false);
+                if(playerNum<=GRAPHICAL_NUM){
+                    intent.putExtra("GRAP", true);
+                }
+                else{
+                    intent.putExtra("GRAP", false);
+                }
                 startActivity(intent);
             }
         });
@@ -201,8 +208,9 @@ public class NameActivity  extends Activity {
     Button.OnClickListener nameBtnTouch = new Button.OnClickListener(){
         public void onClick(View v){
 
+
             if(playerNum>MAX_NUM-1){
-                Toast.makeText(NameActivity.this, "참여 인원이 8명을 넘을 수 없습니다 ㅠㅠ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(NameActivity.this, "참여 인원이 30명을 넘을 수 없습니다 ㅠㅠ", Toast.LENGTH_SHORT).show();
                 return;
             }
             if(editText.getText().toString().length()>4){
@@ -214,6 +222,10 @@ public class NameActivity  extends Activity {
                 return;
             }
 
+            if(playerNum==GRAPHICAL_NUM){
+
+                Toast.makeText(NameActivity.this, "참여 인원이 8명 이상인 경우 일부 그래픽이 제공되지 않습니다", Toast.LENGTH_SHORT).show();
+            }
             if(randomEvent(RANDOM_NUM))
                 displayInterstitial();
 
