@@ -31,6 +31,8 @@ package com.teamverman.givememoney;
 ---------------------------------------------------------*/
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -365,7 +367,7 @@ public class MainActivity extends Activity {
         text3.setText("");
         mode_text.setTypeface(typeFace);
         mode_text.setTextColor(Color.GRAY);
-        mode_text.setText("간략화 전");
+        mode_text.setText("퉁치기 전");
 
         //DRAW CENTER GRAPHICS
 
@@ -623,7 +625,7 @@ public class MainActivity extends Activity {
                     backBtn.setEnabled(false);
                     change_payment_3();
                     mode_text.setTextColor(Color.BLACK);
-                    mode_text.setText("간략화 후");
+                    mode_text.setText("퉁치기 후");
                     centerView.invalidate();
                     if(!isGraphicMode){
                         Toast.makeText(MainActivity.this, "공유하기 버튼을 눌러 결과를 공유하여 주시기 바랍니다. \n(조만간 그래픽 업데이트 예정)", Toast.LENGTH_SHORT).show();
@@ -631,14 +633,14 @@ public class MainActivity extends Activity {
                     return;
                 } else {
                     isChanged = false;
-                    changeBtn.setText("간략하게!!");
+                    changeBtn.setText("퉁치기!!");
                     if (log.lastIndex != 0)
                         backBtn.setEnabled(true);
                     if (log.frontable())
                         frontBtn.setEnabled(true);
                     renew_payment();
                     mode_text.setTextColor(Color.GRAY);
-                    mode_text.setText("간략화 전");
+                    mode_text.setText("퉁치기 전");
                     centerView.invalidate();
 
                 }
@@ -744,41 +746,67 @@ public class MainActivity extends Activity {
 
     public void shareKakao()
     {
-        try{
-            final KakaoLink kakaoLink = KakaoLink.getKakaoLink(this);
-            final KakaoTalkLinkMessageBuilder kakaoBuilder = kakaoLink.createKakaoTalkLinkMessageBuilder();
+//        try{
+//            final KakaoLink kakaoLink = KakaoLink.getKakaoLink(this);
+//            final KakaoTalkLinkMessageBuilder kakaoBuilder = kakaoLink.createKakaoTalkLinkMessageBuilder();
+//
+//        /*메시지 추가*/
+//            String text = "----돈 정산 목록----\n";
+//
+//            for(int i=0; i<playerNum; i++){
+//                boolean line = false;
+//                for(int j=0; j<playerNum; j++){
+//                    if(payment[i][j]>0){
+//                        line = true;
+//                    }
+//                }
+//                if(line)
+//                    text = text+"\n";
+//                for(int j=0; j<playerNum; j++){
+//                    if(payment[i][j]>0){
+//                        text = text+playerName.get(i)+" -> "+playerName.get(j)+" : "+payment[i][j]+"원\n";
+//                    }
+//                }
+//            }
+//
+//            kakaoBuilder.addText(text);
+//
+//        /*앱 실행버튼 추가*/
+//            kakaoBuilder.addAppButton("앱 실행 혹은 다운로드");
+//
+//        /*메시지 발송*/
+//            kakaoLink.sendMessage(kakaoBuilder, this);
+//
+//        }catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
 
-        /*메시지 추가*/
-            String text = "----돈 정산 목록----\n";
+        String text = "----돈 정산 목록----\n";
 
-            for(int i=0; i<playerNum; i++){
-                boolean line = false;
-                for(int j=0; j<playerNum; j++){
-                    if(payment[i][j]>0){
-                        line = true;
-                    }
-                }
-                if(line)
-                    text = text+"\n";
-                for(int j=0; j<playerNum; j++){
-                    if(payment[i][j]>0){
-                        text = text+playerName.get(i)+" -> "+playerName.get(j)+" : "+payment[i][j]+"원\n";
-                    }
+        for(int i=0; i<playerNum; i++){
+            boolean line = false;
+            for(int j=0; j<playerNum; j++){
+                if(payment[i][j]>0){
+                    line = true;
                 }
             }
-
-            kakaoBuilder.addText(text);
-
-        /*앱 실행버튼 추가*/
-            kakaoBuilder.addAppButton("앱 실행 혹은 다운로드");
-
-        /*메시지 발송*/
-            kakaoLink.sendMessage(kakaoBuilder, this);
-
-        }catch (Exception e)
-        {
-            e.printStackTrace();
+            if(line)
+                text = text+"\n";
+            for(int j=0; j<playerNum; j++){
+                if(payment[i][j]>0){
+                    text = text+playerName.get(i)+" -> "+playerName.get(j)+" : "+payment[i][j]+"원\n";
+                }
+            }
         }
+
+        text = text + "\n'빚쟁이' in Play스토어";
+        Toast.makeText(MainActivity.this, "돈 정산 목록이 클립보드에 복사 되었습니다.\n붙여넣기하여 사용바랍니다.", Toast.LENGTH_SHORT).show();
+        String strLabel = "YOUR LABEL";
+        ClipboardManager clipboardManager = (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newPlainText(strLabel, text);
+        clipboardManager.setPrimaryClip(clipData);
+
     }
 
 
